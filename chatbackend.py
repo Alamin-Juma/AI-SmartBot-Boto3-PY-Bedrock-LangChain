@@ -54,7 +54,7 @@ def create_conversation_chain():
     """Create a conversation chain with memory"""
     try:
         llm = ChatBedrock(
-            model_id="amazon.titan-text-express-v1",
+            model_id="amazon.titan-text-lite-v1",  # 👈 updated model ID
             model_kwargs={
                 "temperature": 0.7,
                 "maxTokenCount": 2048,
