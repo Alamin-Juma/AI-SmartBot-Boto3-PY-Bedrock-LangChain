@@ -1,120 +1,134 @@
 ## 1. Import necessary libraries
+from __future__ import annotations
+
 import boto3
+from typing import Dict
+
 from langchain_aws import ChatBedrock
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain
-from langchain.schema import HumanMessage
-import os
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.memory import ConversationSummaryBufferMemory
 
-## 2. Create functions to invoke models
+
+MODEL_ID = "amazon.titan-text-lite-v1"
+MODEL_REGION = "us-east-1"
+
+
+class ChatbotManager:
+    """Manage LLM, prompt template, and per-session memory."""
+
+    def __init__(self) -> None:
+        self.llm = ChatBedrock(
+            model_id=MODEL_ID,
+            model_kwargs={
+                "temperature": 0.5,
+                "maxTokenCount": 2048,
+                "topP": 0.9,
+            },
+            region_name=MODEL_REGION,
+        )
+
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "You are AI SmartBot, an AWS Bedrock assistant that gives precise, concise, "
+                    "and helpful answers. If you are unsure about something, explain what extra "
+                    "information you would need.",
+                ),
+                (
+                    "system",
+                    "Conversation summary so far: {conversation_summary}\nUse it to stay on topic.",
+                ),
+                ("human", "{input}"),
+            ]
+        )
+
+        self.memory_store: Dict[str, ConversationSummaryBufferMemory] = {}
+
+    def _memory_for(self, session_id: str) -> ConversationSummaryBufferMemory:
+        if session_id not in self.memory_store:
+            self.memory_store[session_id] = ConversationSummaryBufferMemory(
+                llm=self.llm,
+                max_token_limit=1500,
+                return_messages=False,
+                ai_memory_key="output",
+                human_memory_key="input",
+            )
+        return self.memory_store[session_id]
+
+    def chat(self, session_id: str, user_input: str) -> str:
+        memory = self._memory_for(session_id)
+        summary = memory.load_memory_variables({}).get("history", "")
+
+        response = self.prompt | self.llm
+        result = response.invoke({
+            "conversation_summary": summary,
+            "input": user_input,
+        })
+
+        output_text = result.content if hasattr(result, "content") else str(result)
+        memory.save_context({"input": user_input}, {"output": output_text})
+        return output_text
+
+
 def setup_bedrock_client():
-    """Set up AWS Bedrock client"""
+    """Check connectivity to AWS Bedrock."""
     try:
-        # Initialize bedrock client with default AWS credentials
-        bedrock_client = boto3.client(
-            'bedrock-runtime',
-            region_name='us-east-1'  # Change to your preferred region
-        )
-        return bedrock_client
-    except Exception as e:
-        print(f"Error setting up Bedrock client: {e}")
+        return boto3.client("bedrock-runtime", region_name=MODEL_REGION)
+    except Exception as exc:  # pragma: no cover
+        print(f"Error setting up Bedrock client: {exc}")
         return None
 
-def titan_llm(input_text):
-    """Function to invoke Amazon Titan model"""
-    try:
-        llm = ChatBedrock(
-            model_id="amazon.titan-text-express-v1",
-            model_kwargs={
-                "temperature": 0.7,
-                "maxTokenCount": 2048,
-                "topP": 0.9
-            },
-            region_name='us-east-1'  # Change to your preferred region
-        )
-        
-        # Create a proper message format
-        message = HumanMessage(content=input_text)
-        response = llm.invoke([message])
-        return response.content
-    
-    except Exception as e:
-        return f"Error: {e}"
 
-# Test the function (commented out for production use)
-# response = titan_llm("Hello, how are you?")
-# print(response)
-
-## 3. Create memory functions for the chatbot
-def setup_conversation_memory():
-    """Set up conversation memory"""
-    return ConversationBufferMemory()
-
-def create_conversation_chain():
-    """Create a conversation chain with memory"""
-    try:
-        llm = ChatBedrock(
-            model_id="amazon.titan-text-lite-v1",  # 👈 updated model ID
-            model_kwargs={
-                "temperature": 0.7,
-                "maxTokenCount": 2048,
-                "topP": 0.9
-            },
-            region_name='us-east-1'
-        )
-        
-        memory = setup_conversation_memory()
-        conversation = ConversationChain(
-            llm=llm,
-            memory=memory,
-            verbose=True
-        )
-        return conversation
-    except Exception as e:
-        print(f"Error creating conversation chain: {e}")
-        return None
-
-## 4. Create a chat client function to run chatbot
-def chat_with_bot(conversation_chain, user_input):
-    """Chat with the bot using conversation chain"""
-    try:
-        if conversation_chain:
-            response = conversation_chain.predict(input=user_input)
-            return response
-        else:
-            return "Error: Conversation chain not initialized"
-    except Exception as e:
-        return f"Error in chat: {e}"
-
-def initialize_chatbot():
-    """Initialize the chatbot"""
+def initialize_chatbot() -> ChatbotManager | None:
+    """Initialize the chatbot manager."""
     print("Initializing AI SmartBot...")
-    conversation = create_conversation_chain()
-    
-    if conversation:
-        print("✅ Chatbot initialized successfully!")
-        return conversation
-    else:
-        print("❌ Failed to initialize chatbot")
+    client = setup_bedrock_client()
+    if client is None:
+        print("Unable to connect to AWS Bedrock.")
         return None
+
+    try:
+        chatbot = ChatbotManager()
+        print("Chatbot initialized successfully.")
+        return chatbot
+    except Exception as exc:
+        print(f"Failed to initialize chatbot: {exc}")
+        return None
+
+
+def chat_with_bot(chatbot: ChatbotManager, session_id: str, user_input: str) -> str:
+    """Chat with the bot using the conversation summary memory."""
+    if chatbot is None:
+        return "Error: Chatbot is not initialized."
+
+    try:
+        return chatbot.chat(session_id, user_input)
+    except Exception as exc:
+        return f"Error in chat: {exc}"
+
 
 # Main function for testing
-def main():
-    """Main function to test the chatbot"""
-    conversation = initialize_chatbot()
-    
-    if conversation:
-        print("\n🤖 AI SmartBot is ready! Type 'quit' to exit.")
-        
-        while True:
-            user_input = input("\nYou: ")
-            
-            if user_input.lower() in ['quit', 'exit', 'bye']:
-                print("👋 Goodbye!")
-                break
-            
-            response = chat_with_bot(conversation, user_input)
-            print(f"Bot: {response}")
+def main() -> None:
+    """Main function to test the chatbot via CLI."""
+    chatbot = initialize_chatbot()
+
+    if chatbot is None:
+        return
+
+    print("\nAI SmartBot is ready. Type 'quit' to exit.")
+    session_id = "cli-user"
+
+    while True:
+        user_input = input("\nYou: ")
+
+        if user_input.lower() in {"quit", "exit", "bye"}:
+            print("Goodbye.")
+            break
+
+        response = chat_with_bot(chatbot, session_id, user_input)
+        print(f"Bot: {response}")
+
 
 if __name__ == "__main__":
-    main()  
+    main()
