@@ -24,6 +24,8 @@ Welcome! This guide will help you navigate the complete documentation suite for 
 | **[README.md](../README.md)** | Project overview & architecture | First time reading about the project |
 | **[QUICK_START.md](./QUICK_START.md)** | 5-minute deployment | You want to deploy fast |
 | **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** | Comprehensive deployment | You need detailed instructions |
+| **[FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md)** | Frontend UI screenshots & demo | Understanding the UI/UX |
+| **[Frontend README](../frontend/README.md)** | Frontend installation & setup | Setting up the Streamlit UI |
 | **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | Error fixes & debugging | Something isn't working |
 | **[PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md)** | What was built & lessons learned | Understanding the implementation |
 | **[ENVIRONMENT_VARIABLES_GUIDE.md](./ENVIRONMENT_VARIABLES_GUIDE.md)** | Python vs JavaScript env vars | Learning about environment variables |
@@ -36,13 +38,19 @@ Welcome! This guide will help you navigate the complete documentation suite for 
 - **Understanding the system:** [README.md](../README.md) → Architecture section
 - **Cost estimation:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#cost-estimate)
 - **Technical decisions:** [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md#key-technical-achievements)
+- **UI/UX design:** [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md)
 
-### Initial Deployment
+### Backend Deployment
 1. **Prerequisites:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#prerequisites)
 2. **Configuration:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#configuration)
 3. **Building Lambda:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#building-the-lambda-package)
 4. **Terraform deployment:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#infrastructure-deployment)
 5. **Quick version:** [QUICK_START.md](./QUICK_START.md)
+
+### Frontend Deployment
+1. **Frontend setup:** [Frontend README](../frontend/README.md)
+2. **UI walkthrough:** [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md)
+3. **Quick start:** `cd frontend && ./start.sh`
 
 ### Testing
 - **Manual testing:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#testing-the-api)

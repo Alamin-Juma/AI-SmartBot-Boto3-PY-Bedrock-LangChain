@@ -4,6 +4,8 @@ A secure, intelligent payment collection bot powered by Amazon Bedrock (Meta Lla
 
 ## 🚀 Quick Start
 
+### Backend Deployment
+
 ```bash
 # 1. Configure your Stripe key
 cd terraform
@@ -23,8 +25,28 @@ curl -X POST 'YOUR_API_ENDPOINT' \
   -d '{"sessionId": "test-001", "message": "I want to make a payment"}'
 ```
 
+### Frontend Deployment
+
+```bash
+# 1. Install frontend dependencies
+cd frontend
+pip install -r requirements.txt
+
+# 2. Configure API endpoint
+cp .env.example .env
+# Edit .env and add your API Gateway endpoint
+
+# 3. Run Streamlit app
+streamlit run payment_bot_frontend.py
+
+# Or use quick start script
+./start.sh    # Linux/Mac
+./start.ps1   # Windows
+```
+
 **📖 See [Quick Start Guide](docs/QUICK_START.md) for 5-minute deployment**  
-**📘 See [Full Deployment Guide](docs/DEPLOYMENT_GUIDE.md) for detailed instructions**
+**📘 See [Full Deployment Guide](docs/DEPLOYMENT_GUIDE.md) for detailed instructions**  
+**🎨 See [Frontend README](frontend/README.md) for UI documentation**
 
 ## � Live Testing Example
 
@@ -32,8 +54,9 @@ curl -X POST 'YOUR_API_ENDPOINT' \
 
 *Full payment flow testing with curl commands - collecting name, card, expiry, CVV, and confirmation.*
 
-## �🌟 Key Features
+##  Key Features
 
+### Backend
 - **🔒 PCI-DSS Compliant**: Never stores sensitive payment data; tokenizes via Stripe
 - **🤖 Small, Efficient AI**: Uses Meta Llama 3.2 1B Instruct via cross-region inference profiles
 - **💬 Natural Conversations**: Multi-turn dialogue with intelligent error handling
@@ -41,6 +64,15 @@ curl -X POST 'YOUR_API_ENDPOINT' \
 - **⚡ Serverless**: AWS Lambda + API Gateway, auto-scales, pay-per-use
 - **🛡️ Security**: Secrets Manager, KMS encryption, CloudWatch monitoring
 - **📊 Cost-Effective**: ~$0.0005 per customer interaction (~$0.50/1000 customers)
+
+### Frontend
+- **🎨 Modern UI**: Beautiful Streamlit interface with gradient design and animations
+- **📱 Responsive**: Works seamlessly on desktop, tablet, and mobile devices
+- **🔐 Security Indicators**: Clear PCI-DSS compliance badges and security banners
+- **📊 Progress Tracking**: Visual progress bar showing payment flow completion
+- **🧪 Test Mode**: Easy toggle between test and production environments
+- **⚡ Real-time Chat**: Instant conversational payment collection
+- **🚀 Quick Actions**: One-click conversation starters for common tasks
 
 ## 📋 Table of Contents
 

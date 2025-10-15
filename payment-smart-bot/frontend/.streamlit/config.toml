@@ -1,0 +1,60 @@
+# Streamlit Configuration for Payment Smart Bot Frontend
+# Place this file in .streamlit/config.toml
+
+[theme]
+# Primary color (purple gradient start)
+primaryColor = "#667eea"
+
+# Background colors
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8f9fa"
+
+# Text color
+textColor = "#2d3748"
+
+# Font
+font = "sans serif"
+
+[server]
+# Server settings
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+
+# File watcher
+fileWatcherType = "auto"
+
+# Max upload size (MB)
+maxUploadSize = 200
+
+# Max message size (MB)
+maxMessageSize = 200
+
+# Enable websocket compression
+enableWebsocketCompression = true
+
+[browser]
+# Don't gather usage stats
+gatherUsageStats = false
+
+# Server address (for sharing)
+serverAddress = "localhost"
+serverPort = 8501
+
+[runner]
+# Magic commands
+magicEnabled = true
+
+# Fast reruns
+fastReruns = true
+
+[client]
+# Toolbar mode
+toolbarMode = "minimal"
+
+# Show error details
+showErrorDetails = true
+
+[logger]
+# Log level (debug, info, warning, error, critical)
+level = "info"

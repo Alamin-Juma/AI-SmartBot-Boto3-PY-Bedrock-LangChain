@@ -115,13 +115,57 @@ Chatbot initialized successfully.
 
 ---
 
+---
+
+## 🆕 Option 3: Payment Smart Bot (Production-Ready)
+
+### Frontend (Streamlit Web UI)
+Launch the Payment Smart Bot with secure payment collection:
+
+```bash
+cd /c/dev/personal/AI-SmartBots-Boto3-Bedrock-LLMs/payment-smart-bot/frontend
+C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m streamlit run payment_bot_frontend.py
+```
+
+**Features:**
+- � Secure payment collection interface
+- 🤖 AI-powered conversational flow (Meta Llama 3.2 1B)
+- 🔒 PCI-DSS compliant UI
+- 🛡️ Stripe tokenization integration
+- 📊 Real-time progress tracking
+- 🧪 Test mode with Stripe test cards
+- 📱 Mobile responsive design
+
+**Backend Status:**
+- ✅ Always running (AWS Lambda + API Gateway - serverless)
+- ✅ No manual start needed
+- ✅ API: `https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat`
+
+**Configuration:**
+- Configure API endpoint in sidebar or `.env` file
+- Enable test mode for development
+- Use test card: `4242424242424242`
+
+**Expected output:**
+```
+  You can now view your Streamlit app in your browser.
+
+  URL: http://localhost:8501
+```
+
+**See:** [Payment Bot Running Guide](payment-smart-bot/frontend/RUNNING.md) for detailed instructions
+
+---
+
 ## 📸 Screenshots
 
-### Web Interface
-![AI SmartBot Web Interface](../image.png)
+### AI SmartBot (Basic/Advanced)
+![AI SmartBot Web Interface](image.png)
 
-### Chat Example
-![Chat Example](../image%20copy.png)
+### Payment Smart Bot
+![Payment Smart Bot Interface](payment-smart-bot/docs/api-testing-example.png)
+
+*Secure payment collection with AI-powered conversation*
 
 ---
 
