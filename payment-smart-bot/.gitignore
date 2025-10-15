@@ -1,0 +1,111 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+**/.terraform/*
+
+# Terraform variables with secrets
+*.tfvars
+!*.tfvars.example
+!terraform.tfvars.example
+
+# Lambda deployment packages
+lambda_function.zip
+**/lambda_function.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+env/
+venv/
+.venv
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+secrets.json
+secrets.yaml
+*.pem
+*.key
+*.crt
+*.p12
+
+# AWS
+.aws/
+credentials
+config
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# Node (if using frontend)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build artifacts
+*.zip
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.gif

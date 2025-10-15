@@ -1,0 +1,62 @@
+[
+  {
+    "sessionId": "mock-session-001",
+    "customerName": "John Doe",
+    "cardNumber": "4111111111111111",
+    "expiryDate": "12/2028",
+    "cvv": "123",
+    "billingAddress": "123 Fake St, Anytown, USA 12345",
+    "email": "john.doe@example.com",
+    "amount": 49.99,
+    "status": "collected",
+    "description": "Visa test card - passes Luhn validation"
+  },
+  {
+    "sessionId": "mock-session-002",
+    "customerName": "Jane Smith",
+    "cardNumber": "5555555555554444",
+    "expiryDate": "06/2027",
+    "cvv": "456",
+    "billingAddress": "456 Elm Ave, Sampleville, CA 90210",
+    "email": "jane.smith@example.com",
+    "amount": 29.50,
+    "status": "collected",
+    "description": "Mastercard test card"
+  },
+  {
+    "sessionId": "mock-session-003",
+    "customerName": "Alex Johnson",
+    "cardNumber": "378282246310005",
+    "expiryDate": "03/2029",
+    "cvv": "1234",
+    "billingAddress": "789 Oak Rd, Test City, NY 10001",
+    "email": "alex.johnson@example.com",
+    "amount": 100.00,
+    "status": "collected",
+    "description": "Amex test card - 4-digit CVV"
+  },
+  {
+    "sessionId": "mock-session-004",
+    "customerName": "Emily Davis",
+    "cardNumber": "6011111111111117",
+    "expiryDate": "09/2026",
+    "cvv": "789",
+    "billingAddress": "101 Pine Ln, Demo Town, TX 75001",
+    "email": "emily.davis@example.com",
+    "amount": 15.75,
+    "status": "invalid",
+    "description": "Discover test card - FAILS Luhn (for testing validation)"
+  },
+  {
+    "sessionId": "mock-session-005",
+    "customerName": "Michael Brown",
+    "cardNumber": "4242424242424242",
+    "expiryDate": "11/2030",
+    "cvv": "000",
+    "billingAddress": "202 Maple Blvd, Virtual City, FL 33101",
+    "email": "michael.brown@example.com",
+    "amount": 75.00,
+    "status": "collected",
+    "description": "Stripe-specific Visa test card"
+  }
+]

@@ -1,0 +1,49 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files (contain secrets)
+*.tfvars
+!terraform.tfvars.example
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Lambda deployment package
+lambda_function.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.local
+secrets.json
