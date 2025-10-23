@@ -2,13 +2,15 @@
 
 Quick copy-paste commands for running the Payment Smart Bot.
 
-## ✨ Quick Run Command
+## ✨ Quick Run Command (Windows)
 
 ```bash
 cd /c/dev/personal/AI-SmartBots-Boto3-Bedrock-LLMs/payment-smart-bot/frontend && C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m streamlit run payment_bot_frontend.py
 ```
 
 **Open in browser:** `http://localhost:8501`
+
+**API Endpoint:** `https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat`
 
 ---
 

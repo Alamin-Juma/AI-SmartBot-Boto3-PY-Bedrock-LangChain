@@ -173,8 +173,8 @@ def get_stripe_key() -> str:
 
 def tokenize_payment(collected_data: Dict[str, str]) -> Dict[str, Any]:
     """
-    Tokenize payment data using Stripe API.
-    Creates a PaymentMethod without charging the card.
+    Tokenize payment data using Stripe API with test tokens.
+    Uses pre-generated test tokens for development/testing safety.
     
     Args:
         collected_data: Dict with 'name', 'card', 'expiry', 'cvv'
@@ -189,32 +189,56 @@ def tokenize_payment(collected_data: Dict[str, str]) -> Dict[str, Any]:
         if not stripe.api_key:
             return {"success": False, "error": "Stripe API key not configured"}
         
-        # Parse expiry date
-        exp_month, exp_year = collected_data['expiry'].split('/')
-        exp_month = int(exp_month)
-        exp_year = int('20' + exp_year)
+        # Map collected card to a test token (development mode)
+        # This avoids sending raw card data to Stripe API (PCI compliance)
+        test_card = collected_data['card'].replace(' ', '').replace('-', '')
         
-        # Create PaymentMethod (tokenize card data)
+        # Stripe test tokens - use these during testing
+        test_tokens = {
+            "4242424242424242": "tok_visa",              # Visa - successful charge
+            "4111111111111111": "tok_visa",              # Visa - alternative
+            "5555555555554444": "tok_mastercard",        # Mastercard - successful charge
+            "378282246310005": "tok_amex",               # Amex - successful charge (4-digit CVV)
+            "6011111111111117": "tok_discover",          # Discover - successful charge
+            "4000000000000002": "tok_chargeDeclined",    # Card declined
+            "4000002500003155": "tok_requiresAuth",      # 3D Secure required
+        }
+        
+        # Get test token or return error
+        test_token = test_tokens.get(test_card)
+        if not test_token:
+            error_msg = (
+                f"Invalid test card number: {mask_card_number(test_card)}. "
+                f"Use a Stripe test card number. "
+                f"Valid test cards: "
+                f"Visa (4242424242424242), "
+                f"Mastercard (5555555555554444), "
+                f"Amex (378282246310005). "
+                f"See: https://stripe.com/docs/testing"
+            )
+            print(f"Test token lookup failed: {error_msg}")
+            return {"success": False, "error": error_msg}
+        
+        # Create PaymentMethod using test token instead of raw card data
+        # This is the safe way to tokenize in test mode
         payment_method = stripe.PaymentMethod.create(
             type="card",
             card={
-                "number": collected_data['card'],
-                "exp_month": exp_month,
-                "exp_year": exp_year,
-                "cvc": collected_data['cvv'],
+                "token": test_token,  # Use test token instead of raw card data
             },
             billing_details={
                 "name": collected_data['name']
             }
         )
         
-        print(f"Stripe PaymentMethod created: {payment_method.id}")
+        print(f"Stripe PaymentMethod created with test token: {payment_method.id}")
         
         return {
             "success": True,
             "token": payment_method.id,
             "card_brand": payment_method.card.brand,
-            "last4": payment_method.card.last4
+            "last4": payment_method.card.last4,
+            "test_mode": True
         }
         
     except stripe.CardError as e:
@@ -224,7 +248,7 @@ def tokenize_payment(collected_data: Dict[str, str]) -> Dict[str, Any]:
         return {"success": False, "error": error_msg}
         
     except stripe.StripeError as e:
-        # Other Stripe errors
+        # Other Stripe errors (invalid key, rate limit, etc.)
         print(f"Stripe error: {str(e)}")
         return {"success": False, "error": f"Payment processing error: {str(e)}"}
         

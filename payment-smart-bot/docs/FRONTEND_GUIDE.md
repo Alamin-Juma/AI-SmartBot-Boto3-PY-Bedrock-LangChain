@@ -2,6 +2,45 @@
 
 Visual guide to the Payment Smart Bot frontend interface.
 
+---
+
+## 🚀 How to Run the Frontend
+
+### Quick Start Command
+
+**For Windows (Git Bash):**
+```bash
+cd /c/dev/personal/AI-SmartBots-Boto3-Bedrock-LLMs/payment-smart-bot/frontend && C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m streamlit run payment_bot_frontend.py
+```
+
+**Expected Output:**
+```
+  You can now view your Streamlit app in your browser.
+
+  URL: http://localhost:8501
+```
+
+### Configuration Steps
+
+1. **Open Browser:** Navigate to `http://localhost:8501`
+
+2. **Configure API Endpoint:** In the sidebar under "🔗 API Settings", enter:
+   ```
+   https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat
+   
+   ```
+
+3. **Enable Test Mode:** Toggle "🧪 Test Mode" to ON
+
+4. **Start Payment:** Click "💳 Make a Payment" button
+
+### Backend Status
+- ✅ **Always Running:** AWS Lambda (serverless, no manual start needed)
+- ✅ **API Endpoint:** `https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat`
+- ✅ **Status:** Active and ready to process payments
+
+---
+
 ## 🏠 Home Screen
 
 ### Initial View
@@ -36,7 +75,7 @@ Visual guide to the Payment Smart Bot frontend interface.
 ⚙️ Configuration
 ─────────────────
 🔗 API Settings
-  API Endpoint: [https://your-api...]
+  API Endpoint: [https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat]
   
 🧪 Test Mode: [ON]
   Test Mode Active
@@ -439,8 +478,12 @@ For user documentation, capture:
 Run the frontend and capture your payment flow!
 
 ```bash
-cd frontend
-streamlit run payment_bot_frontend.py
+cd /c/dev/personal/AI-SmartBots-Boto3-Bedrock-LLMs/payment-smart-bot/frontend
+C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m streamlit run payment_bot_frontend.py
 ```
+
+**Open:** `http://localhost:8501`
+
+**Configure API:** `https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat`
 
 Then make a test payment and take screenshots! 📸

@@ -53,7 +53,7 @@ nano .env
 
 Add:
 ```env
-PAYMENT_BOT_API_ENDPOINT=https://your-api-gateway-url.execute-api.region.amazonaws.com/dev/chat
+PAYMENT_BOT_API_ENDPOINT=https://osmgkvun82.execute-api.us-east-1.amazonaws.com/dev/chat
 ```
 
 **Option B: Configure in UI**
@@ -62,6 +62,13 @@ You can also configure the API endpoint directly in the sidebar when running the
 
 ### Step 3: Run the Application
 
+**For Windows (Git Bash):**
+```bash
+cd /c/dev/personal/AI-SmartBots-Boto3-Bedrock-LLMs/payment-smart-bot/frontend
+C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m streamlit run payment_bot_frontend.py
+```
+
+**For Linux/Mac:**
 ```bash
 streamlit run payment_bot_frontend.py
 ```

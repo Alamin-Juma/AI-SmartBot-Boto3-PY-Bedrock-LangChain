@@ -29,6 +29,9 @@ Welcome! This guide will help you navigate the complete documentation suite for 
 | **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | Error fixes & debugging | Something isn't working |
 | **[PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md)** | What was built & lessons learned | Understanding the implementation |
 | **[ENVIRONMENT_VARIABLES_GUIDE.md](./ENVIRONMENT_VARIABLES_GUIDE.md)** | Python vs JavaScript env vars | Learning about environment variables |
+| **[DYNAMODB_SESSIONS_EXPLAINED.md](./DYNAMODB_SESSIONS_EXPLAINED.md)** | Session storage deep dive | Understanding DynamoDB role |
+| **[DYNAMODB_VISUAL_FLOW.md](./DYNAMODB_VISUAL_FLOW.md)** | Session flow diagrams | Visual understanding of sessions |
+| **[AI_VS_PAYMENT_DATA.md](./AI_VS_PAYMENT_DATA.md)** | AI model vs payment data separation | Understanding PCI compliance architecture |
 
 ---
 
@@ -39,6 +42,9 @@ Welcome! This guide will help you navigate the complete documentation suite for 
 - **Cost estimation:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#cost-estimate)
 - **Technical decisions:** [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md#key-technical-achievements)
 - **UI/UX design:** [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md)
+- **Session management:** [DYNAMODB_SESSIONS_EXPLAINED.md](./DYNAMODB_SESSIONS_EXPLAINED.md)
+- **Data flow:** [DYNAMODB_VISUAL_FLOW.md](./DYNAMODB_VISUAL_FLOW.md)
+- **PCI compliance:** [AI_VS_PAYMENT_DATA.md](./AI_VS_PAYMENT_DATA.md)
 
 ### Backend Deployment
 1. **Prerequisites:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#prerequisites)
