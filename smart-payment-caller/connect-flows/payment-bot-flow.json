@@ -1,0 +1,232 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "WelcomeMessage",
+  "Metadata": {
+    "entryPointPosition": {"x": 20, "y": 20},
+    "ActionMetadata": {
+      "WelcomeMessage": {"position": {"x": 200, "y": 50}},
+      "GetPaymentIntent": {"position": {"x": 400, "y": 50}},
+      "CaptureCardNumber": {"position": {"x": 600, "y": 50}},
+      "CaptureExpiry": {"position": {"x": 800, "y": 50}},
+      "CaptureCVV": {"position": {"x": 1000, "y": 50}},
+      "InvokeLambda": {"position": {"x": 1200, "y": 50}},
+      "SpeakResponse": {"position": {"x": 1400, "y": 50}},
+      "EndFlow": {"position": {"x": 1600, "y": 50}}
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "WelcomeMessage",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Welcome to our secure payment system. I'll help you process your payment today. All your information is encrypted and PCI compliant."
+      },
+      "Transitions": {
+        "NextAction": "GetPaymentIntent"
+      }
+    },
+    {
+      "Identifier": "GetPaymentIntent",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "I can help you make a payment. Please say YES to continue, or NO to speak with an agent.",
+        "InputType": "DTMF",
+        "DTMFConfiguration": {
+          "InputTerminationSequence": "#",
+          "MaxDigits": 1
+        }
+      },
+      "Transitions": {
+        "NextAction": "CheckIntent",
+        "Conditions": [
+          {
+            "NextAction": "CaptureCardNumber",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["1"]
+            }
+          },
+          {
+            "NextAction": "TransferToAgent",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["2"]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "GetPaymentIntent",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ]
+      }
+    },
+    {
+      "Identifier": "CaptureCardNumber",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "Please enter your 16-digit card number followed by the pound key.",
+        "InputType": "DTMF",
+        "DTMFConfiguration": {
+          "InputTerminationSequence": "#",
+          "MaxDigits": 16,
+          "MinDigits": 13
+        },
+        "StoreInput": "cardNumber"
+      },
+      "Transitions": {
+        "NextAction": "CaptureExpiry"
+      }
+    },
+    {
+      "Identifier": "CaptureExpiry",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "Thank you. Now enter the expiration date as 4 digits. Month then year. For example, 1 2 2 5 for December 2025.",
+        "InputType": "DTMF",
+        "DTMFConfiguration": {
+          "InputTerminationSequence": "#",
+          "MaxDigits": 4,
+          "MinDigits": 4
+        },
+        "StoreInput": "expiryDate"
+      },
+      "Transitions": {
+        "NextAction": "CaptureCVV"
+      }
+    },
+    {
+      "Identifier": "CaptureCVV",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "Finally, enter the 3-digit security code on the back of your card.",
+        "InputType": "DTMF",
+        "DTMFConfiguration": {
+          "InputTerminationSequence": "#",
+          "MaxDigits": 4,
+          "MinDigits": 3
+        },
+        "StoreInput": "cvv"
+      },
+      "Transitions": {
+        "NextAction": "SetContactAttributes"
+      }
+    },
+    {
+      "Identifier": "SetContactAttributes",
+      "Type": "UpdateContactAttributes",
+      "Parameters": {
+        "Attributes": [
+          {
+            "Key": "cardNumber",
+            "Value": "$.StoredInput.cardNumber"
+          },
+          {
+            "Key": "expiryMonth",
+            "Value": "$.StoredInput.expiryDate[:2]"
+          },
+          {
+            "Key": "expiryYear",
+            "Value": "$.StoredInput.expiryDate[2:]"
+          },
+          {
+            "Key": "cvv",
+            "Value": "$.StoredInput.cvv"
+          },
+          {
+            "Key": "intentType",
+            "Value": "validate_payment"
+          },
+          {
+            "Key": "userInput",
+            "Value": "I want to process my payment"
+          }
+        ]
+      },
+      "Transitions": {
+        "NextAction": "InvokeLambda"
+      }
+    },
+    {
+      "Identifier": "InvokeLambda",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "REPLACE_WITH_YOUR_LAMBDA_ARN",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "cardNumber": "$.Attributes.cardNumber",
+          "expiryMonth": "$.Attributes.expiryMonth",
+          "expiryYear": "$.Attributes.expiryYear",
+          "cvv": "$.Attributes.cvv",
+          "intentType": "$.Attributes.intentType",
+          "userInput": "$.Attributes.userInput"
+        }
+      },
+      "Transitions": {
+        "NextAction": "CheckLambdaResponse",
+        "Conditions": [
+          {
+            "NextAction": "SpeakSuccessResponse",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["$.External.statusCode", "200"]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "SpeakErrorResponse",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ]
+      }
+    },
+    {
+      "Identifier": "SpeakSuccessResponse",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "$.External.response",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "ConfirmPayment"
+      }
+    },
+    {
+      "Identifier": "ConfirmPayment",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Your payment has been processed successfully. Your confirmation number will be sent to you. Thank you for your payment. Goodbye."
+      },
+      "Transitions": {
+        "NextAction": "EndFlow"
+      }
+    },
+    {
+      "Identifier": "SpeakErrorResponse",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "I'm sorry, there was an issue processing your payment. Let me transfer you to a customer service representative who can help you."
+      },
+      "Transitions": {
+        "NextAction": "TransferToAgent"
+      }
+    },
+    {
+      "Identifier": "TransferToAgent",
+      "Type": "TransferToQueue",
+      "Parameters": {
+        "QueueId": "REPLACE_WITH_YOUR_QUEUE_ARN"
+      },
+      "Transitions": {
+        "NextAction": "EndFlow"
+      }
+    },
+    {
+      "Identifier": "EndFlow",
+      "Type": "DisconnectParticipant",
+      "Parameters": {}
+    }
+  ]
+}

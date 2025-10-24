@@ -1,0 +1,66 @@
+# Ignore SAM build artifacts
+.aws-sam/
+samconfig.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets (DO NOT COMMIT)
+.env
+*.pem
+*.key
+secrets/
+
+# Local test outputs
+test-output/
+*.log
+
+# AWS credentials (should be in ~/.aws/)
+credentials
+config
+
+# Terraform (if using)
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Deployment artifacts
+lambda_function.zip
+package/

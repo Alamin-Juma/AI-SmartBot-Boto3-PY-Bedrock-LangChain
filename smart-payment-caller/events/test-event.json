@@ -1,0 +1,21 @@
+{
+  "Details": {
+    "ContactData": {
+      "ContactId": "test-session-12345-67890",
+      "CustomerEndpoint": {
+        "Address": "+15551234567",
+        "Type": "TELEPHONE_NUMBER"
+      },
+      "Channel": "VOICE",
+      "InstanceARN": "arn:aws:connect:us-east-1:123456789012:instance/test-instance"
+    },
+    "Parameters": {
+      "userInput": "I want to make a payment with my credit card",
+      "cardNumber": "4242424242424242",
+      "expiryMonth": "12",
+      "expiryYear": "25",
+      "cvv": "123",
+      "intentType": "validate_payment"
+    }
+  }
+}

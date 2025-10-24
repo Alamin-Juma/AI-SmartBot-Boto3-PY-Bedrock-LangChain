@@ -1,0 +1,273 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  PCI-Compliant IVR Payment Bot
+  Amazon Connect + Bedrock + Stripe Integration
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+  
+  BedrockModelId:
+    Type: String
+    Default: mistral.mistral-7b-instruct-v0:2
+    Description: Bedrock model ID for Mistral 7B
+  
+  StripeSecretParam:
+    Type: String
+    Default: /payment-bot/stripe-secret
+    Description: SSM Parameter Store path for Stripe secret key
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        LOG_LEVEL: INFO
+
+Resources:
+  # S3 Bucket for PCI-compliant audit logs (encrypted)
+  AuditLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub payment-bot-audit-logs-${Environment}-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !GetAtt AuditLogsKMSKey.Arn
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldAuditLogs
+            Status: Enabled
+            ExpirationInDays: 2555  # 7 years (PCI requirement)
+            NoncurrentVersionExpirationInDays: 30
+      Tags:
+        - Key: Purpose
+          Value: PCI-Compliant-Audit-Trail
+        - Key: Compliance
+          Value: SAQ-A-EP
+
+  # KMS Key for encrypting audit logs
+  AuditLogsKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for payment bot audit logs encryption
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM policies
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+          - Sid: Allow Lambda to use key
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+          - Sid: Allow S3 to use key
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+
+  AuditLogsKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/payment-bot-audit-${Environment}
+      TargetKeyId: !Ref AuditLogsKMSKey
+
+  # IAM Role for Lambda function
+  PaymentBotLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub payment-bot-lambda-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource:
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
+        
+        - PolicyName: S3AuditAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub ${AuditLogsBucket.Arn}/*
+        
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !GetAtt AuditLogsKMSKey.Arn
+        
+        - PolicyName: SSMParameterAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource:
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${StripeSecretParam}
+
+  # Main Lambda Function
+  PaymentBotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub payment-bot-handler-${Environment}
+      CodeUri: src/
+      Handler: lambda_handler.lambda_handler
+      Role: !GetAtt PaymentBotLambdaRole.Arn
+      Environment:
+        Variables:
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          AUDIT_BUCKET: !Ref AuditLogsBucket
+          STRIPE_SECRET_PARAM: !Ref StripeSecretParam
+          AWS_REGION: !Ref AWS::Region
+      Tags:
+        Environment: !Ref Environment
+        Compliance: PCI-SAQ-A-EP
+        Purpose: IVR-Payment-Processing
+
+  # CloudWatch Log Group with retention
+  PaymentBotLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/payment-bot-handler-${Environment}
+      RetentionInDays: 90
+
+  # Lambda permission for Amazon Connect
+  ConnectInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PaymentBotFunction
+      Action: lambda:InvokeFunction
+      Principal: connect.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+
+  # CloudWatch Alarms for monitoring
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub payment-bot-lambda-errors-${Environment}
+      AlarmDescription: Alert when Lambda function has errors
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref PaymentBotFunction
+      TreatMissingData: notBreaching
+
+  LambdaDurationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub payment-bot-lambda-duration-${Environment}
+      AlarmDescription: Alert when Lambda duration is high
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 25000  # 25 seconds (timeout is 30s)
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref PaymentBotFunction
+      TreatMissingData: notBreaching
+
+Outputs:
+  PaymentBotFunctionArn:
+    Description: ARN of the Lambda function for Amazon Connect integration
+    Value: !GetAtt PaymentBotFunction.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-FunctionArn
+  
+  PaymentBotFunctionName:
+    Description: Name of the Lambda function
+    Value: !Ref PaymentBotFunction
+    Export:
+      Name: !Sub ${AWS::StackName}-FunctionName
+  
+  AuditLogsBucketName:
+    Description: S3 bucket for PCI-compliant audit logs
+    Value: !Ref AuditLogsBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-AuditBucket
+  
+  KMSKeyId:
+    Description: KMS key ID for audit log encryption
+    Value: !Ref AuditLogsKMSKey
+    Export:
+      Name: !Sub ${AWS::StackName}-KMSKey
+  
+  TestCommand:
+    Description: Command to test the Lambda function locally
+    Value: !Sub |
+      sam local invoke PaymentBotFunction -e events/test-event.json
+  
+  ConnectIntegrationInstructions:
+    Description: Steps to integrate with Amazon Connect
+    Value: !Sub |
+      1. Copy Lambda ARN: ${PaymentBotFunction.Arn}
+      2. In Amazon Connect console, go to Contact Flows
+      3. Add Lambda function: ${PaymentBotFunction}
+      4. Import contact flow from connect-flows/payment-bot-flow.json
+      5. Publish and test
