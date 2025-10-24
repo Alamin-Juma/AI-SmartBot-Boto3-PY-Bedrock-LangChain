@@ -37,9 +37,9 @@ s3 = boto3.client('s3')
 ssm = boto3.client('ssm')
 
 # Environment configuration
-# IMPORTANT: Use custom inference profile ARN for PCI compliance
+# IMPORTANT: Use custom imported model ARN for PCI compliance
 # This ensures the model has NO access to customer data or training on payment info
-BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'arn:aws:bedrock:us-east-1:YOUR_ACCOUNT:inference-profile/YOUR_CUSTOM_MISTRAL_PROFILE')
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'arn:aws:bedrock:us-east-1:875486186130:imported-model/i222wc3dtrqv')  # Qwen2.5-Coder-7B (Testing)
 AUDIT_BUCKET = os.environ.get('AUDIT_BUCKET', 'payment-bot-audit-logs')
 STRIPE_SECRET_PARAM = os.environ.get('STRIPE_SECRET_PARAM', '/payment-bot/stripe-secret')
 

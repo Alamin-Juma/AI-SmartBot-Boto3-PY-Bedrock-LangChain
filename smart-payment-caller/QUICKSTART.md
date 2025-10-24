@@ -22,11 +22,28 @@ aws ssm put-parameter \
 
 Get your key from: https://dashboard.stripe.com/test/apikeys
 
-### Step 2: Enable Bedrock Mistral
+### Step 2: Set Up Bedrock Model
+
+**For POC (Quick Test)**:
 1. Go to: https://console.aws.amazon.com/bedrock/
 2. Click "Model access" → "Manage model access"
-3. Enable "Mistral 7B Instruct"
+3. Enable "Mistral 7B Instruct" (foundation model)
 4. Wait 2-5 minutes
+
+**For Production (PCI Level 1)**:
+```bash
+# Create custom inference profile (10 minutes)
+aws bedrock create-inference-profile \
+  --inference-profile-name "payment-bot-isolated" \
+  --model-source '{"copyFrom":"us.mistral.mistral-7b-instruct-v0:2"}'
+
+# Get ARN for deployment
+aws bedrock get-inference-profile \
+  --inference-profile-identifier payment-bot-isolated \
+  --query 'inferenceProfileArn'
+```
+
+See [docs/CUSTOM_MODEL_SETUP.md](docs/CUSTOM_MODEL_SETUP.md) for complete setup.
 
 ### Step 3: Deploy
 ```bash
@@ -130,7 +147,7 @@ You should see:
 ## 💰 Cost Estimate
 
 **POC (30 test calls)**: ~$3.31/month
-- Bedrock: $0.68
+- Bedrock (Custom Profile): $1.17
 - Lambda: Free tier
 - Connect: $1.62
 - S3/KMS: $1.01

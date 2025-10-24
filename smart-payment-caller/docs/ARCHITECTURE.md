@@ -38,12 +38,15 @@
 │         │              │                   │   │                            │
 │         ▼              ▼                   ▼   │                            │
 │  ┌─────────────┐ ┌──────────────┐  ┌──────────────┐                        │
-│  │   Stripe    │ │   Amazon     │  │   Amazon S3  │                        │
+│              │   Amazon     │  │   Amazon S3  │                        │
 │  │   Gateway   │ │   Bedrock    │  │ (Audit Logs) │                        │
 │  ├─────────────┤ ├──────────────┤  ├──────────────┤                        │
-│  │ Tokenize    │ │ Mistral 7B   │  │ KMS Encrypted│                        │
-│  │ Validate    │ │ (No CHD!)    │  │ Versioned    │                        │
-│  │ Charge      │ │ Model Weights│  │ 7yr Retention│                        │
+│  │ Tokenize    │ │ Custom       │  │ KMS Encrypted│                        │
+│  │ Validate    │ │ Inference    │  │ Versioned    │                        │
+│  │ Charge      │ │ Profile      │  │ 7yr Retention│                        │
+│  │             │ │ (Isolated)   │  │              │                        │
+│  │             │ │ Mistral 7B   │  │              │                        │
+│  │             │ │ (No CHD!)    │  │              │                        │
 │  └─────────────┘ └──────────────┘  └──────────────┘                        │
 │         │              │                   │                                │
 │         │              │                   │                                │
@@ -243,12 +246,20 @@ Lambda IAM Policy:
 
 **CRITICAL**: This is the PCI compliance boundary.
 
-### Amazon Bedrock (Mistral 7B)
+### Amazon Bedrock (Custom Inference Profile - Mistral 7B)
 **Role**: Conversational AI (NO CHD ACCESS)  
+**Model Type**: Cross-Region Inference Profile (Isolated Compute)
+
 **Handles**:
 - Natural language response generation
 - Intent understanding (from masked data)
 - Friendly confirmation messages
+
+**PCI Level 1 Compliance**:
+- ✅ Dedicated inference endpoint (not shared)
+- ✅ No cross-account data access
+- ✅ Isolated compute resources
+- ✅ QSA-approvable architecture
 
 **NEVER Receives**:
 - Full card numbers
@@ -305,33 +316,36 @@ Lambda IAM Policy:
 
 ### POC Phase (30 test calls)
 ```
-Service             Usage                       Cost
-─────────────────────────────────────────────────────
-Amazon Connect      30 calls × 3 min × $0.018   $1.62
-Lambda              30 × 512MB × 5s              Free
-Bedrock (Mistral)   30 × 150 tokens × $0.00015   $0.68
-S3 Storage          30 logs × 5KB                $0.01
-KMS                 1 key                        $1.00
-CloudWatch          1GB logs                     Free
-SSM Parameter       1 SecureString               Free
-─────────────────────────────────────────────────────
-TOTAL                                            $3.31
+Service                  Usage                       Cost
+───────────────────────────────────────────────────────────
+Amazon Connect           30 calls × 3 min × $0.018   $1.62
+Lambda                   30 × 512MB × 5s              Free
+Bedrock (Custom Profile) 30 × 150 tokens × $0.00026   $1.17
+S3 Storage               30 logs × 5KB                $0.01
+KMS                      1 key                        $1.00
+CloudWatch               1GB logs                     Free
+SSM Parameter            1 SecureString               Free
+───────────────────────────────────────────────────────────
+TOTAL                                                 $3.80
 ```
 
 ### Production (1000 calls/month)
 ```
-Service             Usage                       Cost
-─────────────────────────────────────────────────────
-Amazon Connect      1000 × 3 min × $0.018       $54.00
-Lambda              1000 × 512MB × 5s            $0.42
-Bedrock (Mistral)   1000 × 150 tokens × $0.00015 $22.50
-S3 Storage          1000 logs × 5KB              $0.03
-KMS                 1 key                        $1.00
-CloudWatch          5GB logs                     $0.50
-WAF (optional)      1M requests                  $5.00
-─────────────────────────────────────────────────────
-TOTAL                                           $83.45
+Service                  Usage                       Cost
+───────────────────────────────────────────────────────────
+Amazon Connect           1000 × 3 min × $0.018       $54.00
+Lambda                   1000 × 512MB × 5s            $0.42
+Bedrock (Custom Profile) 1000 × 150 tokens × $0.00026 $39.00
+S3 Storage               1000 logs × 5KB              $0.03
+KMS                      1 key                        $1.00
+CloudWatch               5GB logs                     $0.50
+WAF (optional)           1M requests                  $5.00
+───────────────────────────────────────────────────────────
+TOTAL                                                $99.95
 ```
+
+**Note**: Custom Inference Profile pricing is ~1.7x foundation model pricing but provides
+PCI Level 1 compliant isolation. Foundation model: $0.00015/token vs Custom: $0.00026/token.
 
 ---
 

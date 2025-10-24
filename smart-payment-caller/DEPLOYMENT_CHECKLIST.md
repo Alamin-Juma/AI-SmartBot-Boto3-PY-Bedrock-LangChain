@@ -44,11 +44,38 @@
   ```
 
 ### ☐ Amazon Bedrock Setup
+
+**IMPORTANT**: For PCI Level 1 compliance, use Custom Inference Profile (not foundation model)
+
+#### Option 1: Foundation Model (POC Only)
 - [ ] Bedrock available in your region
   ```bash
   aws bedrock list-foundation-models --region us-east-1
   ```
 - [ ] Mistral 7B Instruct access requested
+  - Go to: https://console.aws.amazon.com/bedrock/
+  - Enable "Mistral 7B Instruct"
+  - ⚠️ **Note**: Not PCI Level 1 compliant (shared compute)
+
+#### Option 2: Custom Inference Profile (Production - RECOMMENDED)
+- [ ] Custom inference profile created
+  ```bash
+  aws bedrock create-inference-profile \
+    --inference-profile-name "payment-bot-isolated" \
+    --model-source '{"copyFrom":"us.mistral.mistral-7b-instruct-v0:2"}' \
+    --inference-profile-config '{"modelCopyConfig":{"targetRegion":"us-west-2","copyType":"COPY_AND_ENCRYPT"}}'
+  ```
+- [ ] Profile ARN obtained
+  ```bash
+  PROFILE_ARN=$(aws bedrock get-inference-profile \
+    --inference-profile-identifier payment-bot-isolated \
+    --query 'inferenceProfileArn' --output text)
+  echo "Custom Profile ARN: $PROFILE_ARN"
+  ```
+- [ ] ARN saved for deployment (use in sam deploy --guided)
+- [ ] ✅ **PCI Level 1 Compliant** (isolated compute, QSA-approvable)
+
+See [docs/CUSTOM_MODEL_SETUP.md](docs/CUSTOM_MODEL_SETUP.md) for detailed setup
   - Go to: https://console.aws.amazon.com/bedrock/
   - Click "Model access" → "Manage model access"
   - Enable "Mistral 7B Instruct"

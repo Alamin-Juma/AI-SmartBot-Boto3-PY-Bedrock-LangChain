@@ -103,12 +103,16 @@ sam deploy --guided
 #   Stack name: payment-bot-poc
 #   AWS Region: us-east-1
 #   Parameter Environment: dev
-#   Parameter BedrockModelId: mistral.mistral-7b-instruct-v0:2
+#   Parameter BedrockModelId: <YOUR_CUSTOM_INFERENCE_PROFILE_ARN>
+#       For POC: mistral.mistral-7b-instruct-v0:2 (foundation model)
+#       For Production: arn:aws:bedrock:us-east-1:ACCOUNT:inference-profile/PROFILE_NAME
 #   Parameter StripeSecretParam: /payment-bot/stripe-secret
 #   Confirm changes: Y
 #   Allow SAM CLI IAM role creation: Y
 #   Disable rollback: N
 #   Save arguments to samconfig.toml: Y
+
+# Note: See docs/CUSTOM_MODEL_SETUP.md for creating custom inference profile
 ```
 
 ### Step 4: Test Locally (Without Amazon Connect)

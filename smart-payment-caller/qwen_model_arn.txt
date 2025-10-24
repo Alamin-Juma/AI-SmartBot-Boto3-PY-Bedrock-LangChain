@@ -1,0 +1,1 @@
+arn:aws:bedrock:us-east-1:875486186130:imported-model/i222wc3dtrqv

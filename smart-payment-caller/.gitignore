@@ -64,3 +64,24 @@ config
 # Deployment artifacts
 lambda_function.zip
 package/
+*.zip
+
+# Model files (LARGE - do not commit!)
+qwen-2.5-coder-7b/
+mistral-7b-instruct/
+*.safetensors
+*.bin
+*.gguf
+*.onnx
+*.model
+
+# Bedrock/deployment temp files (generated during deployment)
+qwen_import_job_id.txt
+bedrock-trust-policy.json
+bedrock-s3-policy.json
+download_qwen.py
+
+# Terraform plans
+*.tfplan
+terraform.tfplan
+crash.log
